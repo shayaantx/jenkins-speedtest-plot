@@ -1,4 +1,4 @@
-## Simple jenkinsfile for plotting speedtest data at whatever interval you want. See below example config
+## Simple jenkinsfile for plotting speedtest data at whatever interval you want (needs docker installed). See below example config
 <br/>
 <br/>
 
