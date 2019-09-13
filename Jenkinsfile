@@ -3,6 +3,12 @@ import java.text.SimpleDateFormat;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
+def simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+def simpleDttmFormat = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
+def actualNow = new Date();
+def now = simpleDttmFormat.format(actualNow);
+def group = simpleDateFormat.format(actualNow);
+					
 pipeline {
     agent any
 	stages {
@@ -17,9 +23,6 @@ pipeline {
 				script {
 					def build = Jenkins.getInstance().getItemByFullName(env.JOB_NAME).getBuildByNumber(Integer.parseInt(env.BUILD_NUMBER));
 					def logContent = build.logFile.text
-						
-					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
-					String now = simpleDateFormat.format(new Date());
 	                currentBuild.description = now;
 	                
 					String[] lines = logContent.split(System.getProperty("line.separator"));
@@ -52,7 +55,7 @@ pipeline {
 	
 	post {
 		always {
-			plot csvFileName: 'plot-856fbd0f-69e7-44df-9867-8d8f598dabeb.csv', csvSeries: [[displayTableFlag: true, exclusionValues: 'downloads,uploads', file: 'data.csv', inclusionFlag: 'OFF', url: '']], group: 'speedtest', style: 'line', title: 'speedtest', yaxis: 'mbps', useDescr: true
+			plot csvFileName: 'plot-856fbd0f-69e7-44df-9867-8d8f598dabeb.csv', csvSeries: [[displayTableFlag: true, exclusionValues: 'downloads,uploads', file: 'data.csv', inclusionFlag: 'OFF', url: '']], group: "${group}", style: 'line', title: "speedtest", yaxis: 'mbps', useDescr: true
 			deleteDir()
 		}
 	}
