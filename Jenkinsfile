@@ -55,7 +55,8 @@ pipeline {
 		} finally {
 			stage('cleanup') {
 				steps {
-					sh "docker ps -a | awk '{ print $1,$2 }' | grep kklipsch/run-speedtest-cli | awk '{print $1 }' | xargs -I {} docker rm {}"
+					sh "chmod 700 delete-old-container.sh"
+					sh "delete-old-container.sh"
 				}
 			}
 		}

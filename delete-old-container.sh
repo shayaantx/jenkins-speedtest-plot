@@ -1,0 +1,1 @@
+docker ps -a | awk '{ print $1,$2 }' | grep kklipsch/run-speedtest-cli | awk '{print $1 }' | xargs -I {} docker rm {}
