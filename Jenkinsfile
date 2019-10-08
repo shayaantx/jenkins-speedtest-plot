@@ -12,52 +12,50 @@ def group = simpleDateFormat.format(actualNow);
 pipeline {
     agent any
 	stages {
-		try {
-			stage('run speed test') {
-				steps {
-					sh 'docker run kklipsch/run-speedtest-cli | grep -E "Download:|Upload:"'
-				}
+		stage('run speed test') {
+			steps {
+				sh 'docker run kklipsch/run-speedtest-cli | grep -E "Download:|Upload:"'
 			}
+		}
 
-			stage('write results') {
-				steps {
-					script {
-						def build = Jenkins.getInstance().getItemByFullName(env.JOB_NAME).getBuildByNumber(Integer.parseInt(env.BUILD_NUMBER));
-						def logContent = build.logFile.text
-						currentBuild.description = now;
-						
-						String[] lines = logContent.split(System.getProperty("line.separator"));
-						String graphData = "date,download,upload\n";
-						graphData += now + ",";
-						int i = 0;
-						for (String line : lines) {
-							if (line.startsWith("Download:") && i != 2) {
-								graphData += line.split(":")[1] + ",";
-								i++;
-							} else if (line.startsWith("Upload:") && i != 2) {
-								graphData += line.split(":")[1] + ",";
-								i++;
-							}
+		stage('write results') {
+			steps {
+				script {
+					def build = Jenkins.getInstance().getItemByFullName(env.JOB_NAME).getBuildByNumber(Integer.parseInt(env.BUILD_NUMBER));
+					def logContent = build.logFile.text
+					currentBuild.description = now;
+					
+					String[] lines = logContent.split(System.getProperty("line.separator"));
+					String graphData = "date,download,upload\n";
+					graphData += now + ",";
+					int i = 0;
+					for (String line : lines) {
+						if (line.startsWith("Download:") && i != 2) {
+							graphData += line.split(":")[1] + ",";
+							i++;
+						} else if (line.startsWith("Upload:") && i != 2) {
+							graphData += line.split(":")[1] + ",";
+							i++;
 						}
-						graphData += "\n";
-
-						File output = new File(env.WORKSPACE, "data.csv");
-						Files.write(output.toPath(), graphData.replaceAll("Mbit/s", "").replaceAll("Mbit/s", "").getBytes(), StandardOpenOption.CREATE);
 					}
+					graphData += "\n";
+
+					File output = new File(env.WORKSPACE, "data.csv");
+					Files.write(output.toPath(), graphData.replaceAll("Mbit/s", "").replaceAll("Mbit/s", "").getBytes(), StandardOpenOption.CREATE);
 				}
 			}
-			
-			stage('archive') {
-				steps {
-					archiveArtifacts 'data.csv'
-				}
+		}
+		
+		stage('archive') {
+			steps {
+				archiveArtifacts 'data.csv'
 			}
-		} finally {
-			stage('cleanup') {
-				steps {
-					sh "chmod 700 delete-old-container.sh"
-					sh "delete-old-container.sh"
-				}
+		}
+		
+		stage('cleanup') {
+			steps {
+				sh "chmod 700 delete-old-container.sh"
+				sh "delete-old-container.sh"
 			}
 		}
 	}
