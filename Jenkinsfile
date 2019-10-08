@@ -55,7 +55,7 @@ pipeline {
 		stage('cleanup') {
 			steps {
 				sh "chmod 700 delete-old-container.sh"
-				sh "delete-old-container.sh"
+				sh "./delete-old-container.sh"
 			}
 		}
 	}
